@@ -1,7 +1,7 @@
 from sklearn.datasets import fetch_openml
-from sklearn.utils.multiclass import unique_labels
+from sklearn.model_selection import train_test_split
+from sklearn.utils import resample
 import numpy as np
-import matplotlib.pyplot as plt
 
 from kfda import Kfda
 
@@ -10,15 +10,28 @@ def rbf(variance):
     return lambda a, b: np.exp((((a - b) / np.sqrt(variance))**2).sum(-1) / 2)
 
 
-cls = Kfda(kernel=rbf(1e8))
-X = np.load('data.npy')
-y = np.load('labels.npy')
+def poly(d):
+    return lambda a, b: (np.inner(a, b) + 1)**d
 
-print("Fitting")
-cls.fit(X, y)
 
-points = cls.project_points(X).reshape(10, 10, -1)
+# cls = Kfda(kernel=poly(9), n_components=8)
+cls = Kfda(kernel=rbf(1e8), n_components=8)
+# cls = Kfda(kernel=None, n_components=8)
+X, y = fetch_openml('mnist_784', version=1, return_X_y=True)
 
-for pointset in points:
-    plt.plot(pointset[:, 0], pointset[:, 1], '.')
-plt.show()
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, train_size=2000, test_size=2000, stratify=y)
+
+cls.fit(X_train, y_train)
+
+test_score = cls.score(X_test, y_test)
+train_score = cls.score(X_train, y_train)
+print(f'Test Score: {test_score}')
+print(f'Train Score: {train_score}')
+
+test_embeddings = cls.project_points(X_test)
+train_embeddings = cls.project_points(X_train)
+np.savetxt('test_embeddings.tsv', test_embeddings, delimiter='\t')
+np.savetxt('train_embeddings.tsv', train_embeddings, delimiter='\t')
+np.savetxt('test_labels.tsv', y_test, delimiter='\t', fmt="%s")
+np.savetxt('train_labels.tsv', y_train, delimiter='\t', fmt="%s")

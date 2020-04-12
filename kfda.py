@@ -2,6 +2,7 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.utils.multiclass import unique_labels
 from scipy.linalg import eig
+from sklearn.neighbors import NearestCentroid
 import numpy as np
 
 
@@ -13,6 +14,9 @@ class Kfda(BaseEstimator, ClassifierMixin):
     def __init__(self, n_components=2, kernel=lambda a, b: np.inner(a, b)):
         self.kernel = kernel
         self.n_components = n_components
+
+        if kernel is None:
+            self.kernel = lambda a, b: np.inner(a, b)
 
     def fit(self, X, y):
         X, y = check_X_y(X, y)
@@ -73,5 +77,10 @@ class Kfda(BaseEstimator, ClassifierMixin):
         check_is_fitted(self)
 
         X = check_array(X)
+        clf = NearestCentroid()
+        clf.fit(self.centers_, self.classes_)
 
-        return 0
+        projected_points = self.project_points(X)
+        predictions = clf.predict(projected_points)
+
+        return predictions
