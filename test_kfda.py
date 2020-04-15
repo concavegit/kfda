@@ -1,6 +1,5 @@
 from sklearn.datasets import fetch_openml
 from sklearn.model_selection import train_test_split
-from sklearn.utils import resample
 import numpy as np
 
 from kfda import Kfda
@@ -15,7 +14,7 @@ def poly(d):
 
 
 # cls = Kfda(kernel=poly(9), n_components=8)
-cls = Kfda(kernel=rbf(1e8), n_components=8)
+cls = Kfda(kernel=rbf(1e6), n_components=9)
 # cls = Kfda(kernel=None, n_components=8)
 X, y = fetch_openml('mnist_784', version=1, return_X_y=True)
 
