@@ -14,13 +14,10 @@ def kernel_matrix(kernel, a, b):
     rows = a.shape[0]
     cols = b.shape[0]
 
-    a_repeated = np.repeat(a, cols, axis=0)
+    a_repeated = np.repeat(a, cols, 0)
     b_repeated = np.tile(b, (rows, 1))
 
-    values = kernel(a_repeated, b_repeated)
-    kernel_matrix = values.reshape(rows, cols)
-
-    return kernel_matrix
+    return kernel(a_repeated, b_repeated).reshape(rows, cols)
 
 
 class Kfda(BaseEstimator, ClassifierMixin):
