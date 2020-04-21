@@ -83,6 +83,7 @@ class Kfda(BaseEstimator, ClassifierMixin):
         return self
 
     def project(self, X):
+        check_is_fitted(self)
         return kernel_matrix(self.kernel, X, self.X_).dot(self.weights_)
 
     def predict(self, X):
