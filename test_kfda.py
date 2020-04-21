@@ -21,15 +21,17 @@ X, y = fetch_openml('mnist_784', version=1, return_X_y=True)
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, train_size=2000, test_size=2000, stratify=y)
 
+print('fitting')
 cls.fit(X_train, y_train)
+print('scoring')
 
 test_score = cls.score(X_test, y_test)
 train_score = cls.score(X_train, y_train)
 print(f'Test Score: {test_score}')
 print(f'Train Score: {train_score}')
 
-test_embeddings = cls.project_points(X_test)
-train_embeddings = cls.project_points(X_train)
+test_embeddings = cls.project(X_test)
+train_embeddings = cls.project(X_train)
 np.savetxt('test_embeddings.tsv', test_embeddings, delimiter='\t')
 np.savetxt('train_embeddings.tsv', train_embeddings, delimiter='\t')
 np.savetxt('test_labels.tsv', y_test, delimiter='\t', fmt="%s")
