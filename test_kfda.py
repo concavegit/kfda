@@ -1,6 +1,7 @@
 from sklearn.datasets import fetch_openml
 from sklearn.model_selection import train_test_split
 import numpy as np
+import pandas as pd
 
 from kfda import Kfda
 
@@ -19,7 +20,7 @@ cls = Kfda(kernel=rbf(1e6), n_components=9)
 X, y = fetch_openml('mnist_784', version=1, return_X_y=True)
 
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, train_size=2000, test_size=2000, stratify=y)
+    X, y, train_size=2000, test_size=1000, stratify=y)
 
 print('fitting')
 cls.fit(X_train, y_train)
@@ -32,6 +33,7 @@ print(f'Train Score: {train_score}')
 
 test_embeddings = cls.project(X_test)
 train_embeddings = cls.project(X_train)
+
 np.savetxt('test_embeddings.tsv', test_embeddings, delimiter='\t')
 np.savetxt('train_embeddings.tsv', train_embeddings, delimiter='\t')
 np.savetxt('test_labels.tsv', y_test, delimiter='\t', fmt="%s")

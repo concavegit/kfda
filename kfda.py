@@ -20,13 +20,25 @@ def kernel_matrix(kernel, a, b):
     return kernel(a_repeated, b_repeated).reshape(rows, cols)
 
 
+def rbf(variance):
+    return lambda a, b: np.exp((((a - b) / np.sqrt(variance))**2).sum(-1) / 2)
+
+
+def linear(a, b):
+    return (a  * b).sum(-1)
+
+
+def poly(d):
+    return lambda a, b: (linear(a, b) + 1)**d
+
+
 class Kfda(BaseEstimator, ClassifierMixin):
     def __init__(self, n_components=2, kernel=lambda a, b: np.inner(a, b)):
         self.kernel = kernel
         self.n_components = n_components
 
         if kernel is None:
-            self.kernel = lambda a, b: np.inner(a, b)
+            self.kernel = linear
 
     def fit(self, X, y):
         X, y = check_X_y(X, y)
@@ -63,10 +75,7 @@ class Kfda(BaseEstimator, ClassifierMixin):
         # Find weights
         w, v = eig(M, N)
 
-        w_finite_mask = ~(np.isinf(w) | np.isnan(w))
-        w = w[w_finite_mask]
-        v = v[:, w_finite_mask]
-        v = v[:, np.argsort(w)[:-self.n_components-1:-1]]
+        v = v[:, :self.n_components]
 
         self.weights_ = v.real
 
