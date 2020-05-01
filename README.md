@@ -1,4 +1,7 @@
 # Kernel FDA
+
+[![PyPI version](https://badge.fury.io/py/kfda.svg)](https://badge.fury.io/py/kfda)
+
 This repository implements Kernel FDA as described in [https://arxiv.org/abs/1906.09436](https://arxiv.org/abs/1906.09436).
 
 ## Examples
