@@ -1,8 +1,9 @@
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.utils.multiclass import unique_labels
-from scipy.linalg import eig
+from scipy.sparse.linalg import eigs
 from sklearn.neighbors import NearestCentroid
+from sklearn.metrics import pairwise_kernels
 import numpy as np
 
 
@@ -10,35 +11,34 @@ def centering_matrix(n):
     return np.eye(n) - 1 / n
 
 
-def kernel_matrix(kernel, a, b):
-    rows = a.shape[0]
-    cols = b.shape[0]
-
-    a_repeated = np.repeat(a, cols, 0)
-    b_repeated = np.tile(b, (rows, 1))
-
-    return kernel(a_repeated, b_repeated).reshape(rows, cols)
+def complex_to_real(x):
+    return np.concatenate([x.real, x.imag], -1)
 
 
-def rbf(variance):
-    return lambda a, b: np.exp((((a - b) / np.sqrt(variance))**2).sum(-1) / 2)
+class ComplexNearestCentroid(BaseEstimator, ClassifierMixin):
+    def __init__(self):
+        self.clf_ = NearestCentroid()
 
+    def fit(self, X, y):
+        X, y = check_X_y(complex_to_real(X), y)
+        self.clf_.fit(X, y)
 
-def linear(a, b):
-    return (a  * b).sum(-1)
+    def predict(self, X):
+        check_is_fitted(self)
 
+        X = check_array(complex_to_real(X))
 
-def poly(d):
-    return lambda a, b: (linear(a, b) + 1)**d
+        return self.clf_.predict(X)
 
 
 class Kfda(BaseEstimator, ClassifierMixin):
-    def __init__(self, n_components=2, kernel=lambda a, b: np.inner(a, b)):
+    def __init__(self, n_components=2, kernel='linear', **kwargs):
         self.kernel = kernel
         self.n_components = n_components
+        self.kwargs = kwargs
 
         if kernel is None:
-            self.kernel = linear
+            self.kernel = 'linear'
 
     def fit(self, X, y):
         X, y = check_X_y(X, y)
@@ -51,7 +51,8 @@ class Kfda(BaseEstimator, ClassifierMixin):
 
         classes_datapoints = {}
 
-        m_star = kernel_matrix(self.kernel, X, X).mean(1)
+        m_star = pairwise_kernels(
+            X, X, metric=self.kernel, **self.kwargs).mean(1)
 
         m_classes = np.empty((n_classes, n_datapoints))
         M_classes = np.empty((n_classes, n_datapoints, n_datapoints))
@@ -62,7 +63,8 @@ class Kfda(BaseEstimator, ClassifierMixin):
             n_class_datapoints = class_datapoints.shape[0]
 
             H = centering_matrix(n_class_datapoints)
-            K = kernel_matrix(self.kernel, X, class_datapoints)
+            K = pairwise_kernels(X, class_datapoints,
+                                 metric=self.kernel, **self.kwargs)
             K.mean(1, out=m_classes[i])
 
             m_centered = m_classes[i] - m_star
@@ -73,9 +75,7 @@ class Kfda(BaseEstimator, ClassifierMixin):
         N = N_classes.sum(0)
 
         # Find weights
-        w, v = eig(M, N)
-
-        v = v[:, :self.n_components]
+        w, v = eigs(M, self.n_components, N, which='LM')
 
         self.weights_ = v.real
 
@@ -83,14 +83,14 @@ class Kfda(BaseEstimator, ClassifierMixin):
         self.centers_ = m_classes.dot(self.weights_)
 
         # Train nearest centroid classifier
-        self.clf_ = NearestCentroid()
+        self.clf_ = ComplexNearestCentroid()
         self.clf_.fit(self.centers_, self.classes_)
 
         return self
 
     def project(self, X):
         check_is_fitted(self)
-        return kernel_matrix(self.kernel, X, self.X_).dot(self.weights_)
+        return pairwise_kernels(X, self.X_, metric=self.kernel, **self.kwargs).dot(self.weights_)
 
     def predict(self, X):
         check_is_fitted(self)
