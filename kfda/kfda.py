@@ -210,9 +210,7 @@ class Kfda(BaseEstimator, ClassifierMixin):
         N = N_classes.sum(0)
 
         # Find weights
-        w, v = eigs(M, self.n_components, N, which='LM')
-
-        self.weights_ = v.real
+        w, self.weights_ = eigs(M, self.n_components, N, which='LM')
 
         # Compute centers
         self.centroids_ = m_classes.dot(self.weights_)
