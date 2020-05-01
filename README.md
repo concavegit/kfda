@@ -12,7 +12,7 @@ For example, running `mnist.py` and then loading
 `mnist_test_embeddings.tsv` and `mnist_test_labels.tsv` shows the
 following using the UMAP visualizer:
 
-![MNIST Kernel FDA embeddings](img/mnist.png)
+![MNIST Kernel FDA embeddings](https://github.com/concavegit/kfda/blob/master/img/mnist.png?raw=true)
 
 ## Notebook
 Alternatively, see the
