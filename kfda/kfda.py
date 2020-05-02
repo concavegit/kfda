@@ -1,10 +1,11 @@
-from sklearn.base import BaseEstimator, ClassifierMixin
-from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
-from sklearn.utils.multiclass import unique_labels
 from scipy.sparse.linalg import eigs
-from sklearn.neighbors import NearestCentroid
+from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.metrics import pairwise_kernels
+from sklearn.neighbors import NearestCentroid
+from sklearn.utils.multiclass import unique_labels
+from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 import numpy as np
+import warnings
 
 
 def centering_matrix(n):
@@ -178,6 +179,11 @@ class Kfda(BaseEstimator, ClassifierMixin):
         """
         X, y = check_X_y(X, y)
         self.classes_ = unique_labels(y)
+        if self.n_components > self.classes_.size - 1:
+            warnings.warn(
+                "n_components > classes_.size - 1."
+                "Only the first classes_.size - 1 components will be valid."
+            )
         self.X_ = X
         self.y_ = y
 
