@@ -40,8 +40,8 @@ print(f'Train Score: {train_score}')
 print('Generating embeddings...')
 test_embeddings = cls.transform(X_test)
 
-np.savetxt('mnist_fewshot_test_embeddings.tsv',
+np.savetxt('mnist_oneshot_test_embeddings.tsv',
            test_embeddings, delimiter='\t')
-np.savetxt('mnist_fewshot_test_labels.tsv', y_test, delimiter='\t', fmt="%s")
-np.savetxt('mnist_fewshot_train_labels.tsv', y_train, delimiter='\t', fmt="%s")
+np.savetxt('mnist_oneshot_test_labels.tsv', y_test, delimiter='\t', fmt="%s")
+np.savetxt('mnist_oneshot_train_labels.tsv', y_train, delimiter='\t', fmt="%s")
 print('Embeddings saved to *.tsv! Plug them into https://projector.tensorflow.org/ for embedding visualizations.')
