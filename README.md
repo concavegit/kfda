@@ -28,6 +28,8 @@ Thus, this model is implemented here with the hope of using Kernel FDA as a ones
 
 - Scoring: `cls.score(X, y)`
 
+- Introducing new classes without retraining (fewshot learning): `cls.fit_additional(X, y)`
+
 ## Examples
 See [`examples`](https://github.com/concavegit/kfda/tree/master/examples) for examples on MNIST, faces, and oneshot learning.
 
