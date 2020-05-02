@@ -155,12 +155,10 @@ class Kfda(BaseEstimator, ClassifierMixin, TransformerMixin):
 
         new_classes = np.unique(y)
 
-        K = pairwise_kernels(
-            X, X, metric=self.kernel, **self.kwds)
+        projections = self.transform(X)
         y_onehot = OneHotEncoder().fit_transform(
             y[:, np.newaxis])
-        new_m_classes = y_onehot.T @ K / y_onehot.T.sum(1)
-        new_centroids = new_m_classes @ self.weights_
+        new_centroids = y_onehot.T @ projections / y_onehot.T.sum(1)
 
         concatenated_classes = np.concatenate([self.classes_, new_classes])
         concatenated_centroids = np.concatenate(
