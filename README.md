@@ -21,5 +21,20 @@ following using the UMAP visualizer:
 ![MNIST Kernel FDA embeddings](https://github.com/concavegit/kfda/blob/master/img/mnist.png?raw=true)
 
 ## Notebook
-Alternatively, see the
+Another place to see example usage is the
 [Colab Notebook](https://colab.research.google.com/drive/1nnVphyZ_0QKYZbmdJaIBjm-zYO4xwF0b#scrollTo=6Pfpr7DDQota).
+
+## Caveats
+Similar to SVM, the most glaring constraint of KFDA is the memory limit.
+Kernel FDA requires creating matrices that are `n_samples` by `n_samples` large, meaning the memory requirement grows with respect to `O(n_samples^2)`.
+
+The accuracy is not as high as that of deep methods,
+With a training size of 8000 and a testing size of 62000, performance on MNIST averages around 0.7 accuracy.
+This may be due to the required small training size.
+Without increasing the training size, accuracy can be improved by implementing invariant kernels that would implicitly handle scale and rotation without requiring an extended dataset.
+
+## Oneshot Learning
+Oneshot learning means that an algorithm can learn a new class with as little as sample.
+This may be possible or Kernel FDA because it finds a subspace that inherently spreads out distinct classes.
+Introducing a new label would simply add another centroid for use in prediction.
+With some future development and work, kernel FDA can be used for oneshot learning.
