@@ -13,7 +13,7 @@ Thus, this model is implemented here with the hope of using Kernel FDA as a ones
 ## Usage
 `Kfda` uses `scikit-learn`'s interface.
 
-- Initializing: `cls = Kfda(n_components=2)` for a linear kernel with 2 components.
+- Initializing: `cls = Kfda(n_components=2, kernel='linear')` for a classifier that a linear kernel with 2 components.
   For kernel of degree 2, use `Kfda(n_components=2, kernel='poly', degree=2)` for a polynomial kernel of degree 2.
   See https://scikit-learn.org/stable/modules/metrics.html#polynomial-kernel for a list of kernels and their parameters, or the [source code docstrings](https://github.com/concavegit/kfda/blob/master/kfda/kfda.py) for a complete description of the parameters.
 
