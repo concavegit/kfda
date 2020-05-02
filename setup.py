@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="kfda",
-    version="0.1.0",
+    version="0.1.1",
     author="Kawin Nikomborirak",
     author_email="concavemail@gmail.com",
     description="Kernel FDA implementation described in https://arxiv.org/abs/1906.09436",

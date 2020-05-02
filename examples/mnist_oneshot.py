@@ -6,9 +6,7 @@ from kfda import Kfda
 
 
 X, y = fetch_openml('mnist_784', version=1, return_X_y=True)
-
 X = (X - 127.5) / 127.5
-
 
 # If you don't have that much memory available, lower this number.
 X_train, X_test, y_train, y_test = train_test_split(
@@ -16,10 +14,11 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 
 # Remove nines from the training set
-X_train_nines = X_train[y_train == '9']
-X_train = X_train[y_train != '9']
-y_train_nines = y_train[y_train == '9']
-y_train = y_train[y_train != '9']
+nines_mask = y_train == '9'
+X_train_nines = X_train[nines_mask]
+X_train = X_train[~nines_mask]
+y_train_nines = y_train[nines_mask]
+y_train = y_train[~nines_mask]
 
 # Train
 cls = Kfda(kernel='rbf', n_components=8)
