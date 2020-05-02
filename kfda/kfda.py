@@ -31,6 +31,11 @@ class Kfda(BaseEstimator, ClassifierMixin, TransformerMixin):
         https://scikit-learn.org/stable/modules/metrics.html#polynomial-kernel
         for more details.
 
+    robustness_offset : float
+        The small value to add along the diagonal of N to gurantee
+        valid fisher directions.
+        Set this to 0 to disable the feature. Default: 1e-8.
+
     **kwds : parameters to pass to the kernel function.
 
     Attributes
@@ -47,7 +52,8 @@ class Kfda(BaseEstimator, ClassifierMixin, TransformerMixin):
     clf_ : The internal NearestCentroid classifier used in prediction.
     """
 
-    def __init__(self, n_components=2, kernel='linear', robustness_offset=1e-8, **kwds):
+    def __init__(self, n_components=2, kernel='linear', robustness_offset=1e-8,
+                 **kwds):
         self.kernel = kernel
         self.n_components = n_components
         self.kwds = kwds
