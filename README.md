@@ -5,7 +5,7 @@
 This repository implements Kernel Fisher Discriminant Analysis (Kernel FDA) as described in [https://arxiv.org/abs/1906.09436](https://arxiv.org/abs/1906.09436).
 FDA, equivalent to Linear Discriminant Analysis (LDA), is a classification method that projects vectors onto a smaller subspace.
 This subspace is optimized to maximize between-class scatter and minimize within class scatter, making it an effective classification method.
-Kernel FDA improves on regular FDA by enabling evaluation in a nonlinear subspace using the [kernel trick](https://en.wikipedia.org/wiki/Kernel_method).
+Kernel FDA improves on regular FDA by enabling nonlinear subspaces using the [kernel trick](https://en.wikipedia.org/wiki/Kernel_method).
 This model is implemented here with the hope of using Kernel FDA as a oneshot learning algorithm.
 
 ## Examples
