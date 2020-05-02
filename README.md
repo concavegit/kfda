@@ -47,7 +47,7 @@ Training a Kernel FDA classifier requires creating matrices that are `n_samples`
 The accuracy is not as high as that of deep methods,
 With a training size of 8000 and a testing size of 62000, performance on MNIST averages around 0.7 accuracy using 8 fisher directions and a polynomial kernel of degree 2.
 This may be due to the constrained training size.
-Without increasing the training size, accuracy can be improved by implementing invariant kernels that would implicitly handle scale and rotation without requiring an extended dataset.
+Accuracy can be improved without increasing training size by implementing invariant kernels that would implicitly handle scale and rotation without requiring an extended dataset.
 
 ## Oneshot Learning
 Oneshot learning means that an algorithm can learn a new class with as little as one sample.
