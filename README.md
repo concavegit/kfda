@@ -24,7 +24,7 @@ Thus, this model is implemented here with the hope of using Kernel FDA as a ones
 - Scoring: `cls.score(X, y)`
 
 ## Examples
-See [`examples`](https://github.com/concavegit/kfda/tree/master/examples) for examples.
+See [`examples`](https://github.com/concavegit/kfda/tree/master/examples) for examples on MNIST, faces, and oneshot learning.
 
 After running them, you can plug corresponding pairs of generated
 `*embeddings.tsv` and `*labels.tsv` into Tensorflow's
@@ -56,6 +56,9 @@ Accuracy can be improved without increasing training size by implementing invari
 
 ## Oneshot Learning
 Oneshot learning means that an algorithm can learn a new class with as little as one sample.
-This may be possible or Kernel FDA because it finds a subspace that inherently spreads out distinct classes.
-Introducing a new label would simply add another centroid for use in prediction.
-With some future development and work, kernel FDA can be used for oneshot learning.
+This is possible for Kernel FDA because it finds a subspace that purposefully spreads out distinct classes.
+Introducing a new label involves simply adding another centroid for use in prediction.
+See the
+[Colab Notebook](https://colab.research.google.com/drive/1nnVphyZ_0QKYZbmdJaIBjm-zYO4xwF0b).
+or the
+[example](https://github.com/concavegit/kfda/blob/master/examples/mnist_oneshot.py) for examples.
