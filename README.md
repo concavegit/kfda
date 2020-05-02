@@ -8,8 +8,21 @@ This subspace is optimized to maximize between-class scatter and minimize within
 Kernel FDA improves on regular FDA by enabling nonlinear subspaces using the [kernel trick](https://en.wikipedia.org/wiki/Kernel_method).
 This model is implemented here with the hope of using Kernel FDA as a oneshot learning algorithm.
 
+## Usage
+`Kfda` uses `scikit-learn`'s interface.
+
+- Initializing: `cls = Kfda(n_components=2)` for a linear kernel with 2 components.
+  For kernel of degree 2, use `Kfda(n_components=2, kernel='poly', degree=2)` for a polynomial kernel of degree 2.
+  See https://scikit-learn.org/stable/modules/metrics.html#polynomial-kernel for a list of kernels and their parameters, or the [source code docstrings](https://github.com/concavegit/kfda/blob/master/kfda/kfda.py) for a complete description of the parameters.
+
+- Fitting: `cls.fit(X, y)`
+
+- Prediction: `cls.predict(X)`
+
+- Scoring: `cls.score(X, y)`
+
 ## Examples
-See [`examples`](examples) for examples.
+See [`examples`](https://github.com/concavegit/kfda/tree/master/examples) for examples.
 
 After running them, you can plug corresponding pairs of generated
 `*embeddings.tsv` and `*labels.tsv` into Tensorflow's
