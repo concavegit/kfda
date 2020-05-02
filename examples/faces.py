@@ -1,6 +1,5 @@
 import numpy as np
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
 from sklearn.datasets import fetch_openml
 
 from kfda import Kfda
@@ -11,8 +10,8 @@ y = y.astype('u8')
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, train_size=.7, stratify=y)
 
-cls = Kfda(kernel='poly', n_components=50, degree=2)
-cls.fit(X_train, y_train)
+cls = Kfda(kernel='rbf', n_components=50)
+train_embeddings = cls.fit_transform(X_train, y_train)
 print('fitted, scoring...')
 
 test_score = cls.score(X_test, y_test)
@@ -21,8 +20,7 @@ train_score = cls.score(X_train, y_train)
 print(f'Train Score: {train_score}')
 
 print('Generating embeddings...')
-test_embeddings = cls.project(X_test)
-train_embeddings = cls.project(X_train)
+test_embeddings = cls.transform(X_test)
 
 # Plug these into https://www.google.com/search?q=tensorflow+projector
 # to visualize embeddings.

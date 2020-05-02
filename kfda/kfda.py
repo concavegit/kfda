@@ -1,125 +1,16 @@
-from scipy.sparse.linalg import eigs
-from sklearn.base import BaseEstimator, ClassifierMixin
+from scipy.sparse.linalg import eigsh
+from scipy.sparse import eye
+from sklearn.base import BaseEstimator, ClassifierMixin, TransformerMixin
 from sklearn.metrics import pairwise_kernels
 from sklearn.neighbors import NearestCentroid
 from sklearn.utils.multiclass import unique_labels
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
+from sklearn.preprocessing import OneHotEncoder
 import numpy as np
 import warnings
 
 
-def centering_matrix(n):
-    """Return a centering matrix H such that H * X = X - mean(X, axis=0).
-
-    Parameters
-    ----------
-    n : int the amount of rows the centering matrix should have
-
-    Returns
-    -------
-    H : ndarray of shape (n, n)
-
-    Examples
-    --------
-    >>> centering_matrix(4)
-    array([[ 0.75, -0.25, -0.25, -0.25],
-           [-0.25,  0.75, -0.25, -0.25],
-           [-0.25, -0.25,  0.75, -0.25],
-           [-0.25, -0.25, -0.25,  0.75]])
-    """
-
-    return np.eye(n) - 1 / n
-
-
-def vectorize_complex(X):
-    """Make a new array of the real components concatenated with the
-    imaginary components of a complex array.
-
-    The real and imaginary components are concatenated along the last
-    axis.
-
-    Parameters
-    ----------
-    X : array-like the input array
-
-    Returns
-    -------
-    A : ndarray
-
-    Examples
-    --------
-    >>> X = np.array([[1 + 1j, 2 + 3j], [0 + 1j, 3 + 2j], [1 + 2j, 2 + 2j]])
-    >>> vectorize_complex(X)
-    array([[1., 2., 1., 3.],
-           [0., 3., 1., 2.],
-           [1., 2., 2., 2.]])
-    """
-    return np.concatenate([X.real, X.imag], -1)
-
-
-class ComplexNearestCentroid(BaseEstimator, ClassifierMixin):
-    """Complex nearest centroid classifier.
-
-    This is a wrapper of NearestCentroid from scikit-learn that
-    enables complex components by turning each complex element into
-    two real components.
-
-    Parameters
-    ----------
-    **kwds : optional keyword parameters
-        Parameters to send to scikit-learn's NearestCentroid.
-
-    Attributes
-    ----------
-    clf_ : NearestCentroid
-        The internal NearestCentroid object.
-
-    See also
-    --------
-    sklearn.neighbors.NearestCentroid: nearest centroid classifier
-    """
-
-    def __init__(self, **kwds):
-        self.clf_ = NearestCentroid(**kwds)
-
-    def fit(self, X, y):
-        """Fit the ComplexNearestCentroid model according to the given
-        training data.
-
-        The parameters are the same as scikit-learn's NearestCentroid,
-        but X is complex.
-
-        Parameters
-        ----------
-        X : {array-like, sparse matrix} complex of shape (n_samples,
-            n_features) Training vector, where n_samples is the number
-            of samples and n_features is the number of features.
-        y : array, shape = [n_samples]
-            Target values (integers)
-        """
-        X, y = check_X_y(vectorize_complex(X), y)
-        self.clf_.fit(X, y)
-
-    def predict(self, X):
-        """Perform classification on an array of test vectors X.
-        The predicted class C for each sample in X is returned.
-
-        Parameters
-        ----------
-        X : array-like of shape (n_samples, n_features)
-
-        Returns
-        -------
-        C : ndarray of shape (n_samples,)
-        """
-        check_is_fitted(self)
-
-        X = check_array(vectorize_complex(X))
-
-        return self.clf_.predict(X)
-
-
-class Kfda(BaseEstimator, ClassifierMixin):
+class Kfda(BaseEstimator, ClassifierMixin, TransformerMixin):
     """Kernel Fisher Discriminant Analysis classifier.
 
     Each class is represented by a centroid using projections in a
@@ -133,14 +24,14 @@ class Kfda(BaseEstimator, ClassifierMixin):
         This is limited by the amount of classes minus one.
         See the paper for further discussion of this limit.
 
-    kernel : str, ['linear', 'polynomial', 'sigmoid', 'rbf','laplacian', 'chi2']
+    kernel : str, ['linear', 'poly', 'sigmoid', 'rbf','laplacian', 'chi2']
         The kernel to use.
         Use **kwds to pass arguments to these functions.
         See
         https://scikit-learn.org/stable/modules/metrics.html#polynomial-kernel
         for more details.
 
-    **kwargs : parameters to pass to the kernel function.
+    **kwds : parameters to pass to the kernel function.
 
     Attributes
     ----------
@@ -153,13 +44,14 @@ class Kfda(BaseEstimator, ClassifierMixin):
     weights_ : array of shape (n_components, n_samples) that
         represent the fisher components.
 
-    clf_ : The internal ComplexNearestCentroid classifier used in prediction.
+    clf_ : The internal NearestCentroid classifier used in prediction.
     """
 
-    def __init__(self, n_components=2, kernel='linear', **kwargs):
+    def __init__(self, n_components=2, kernel='linear', robustness_offset=1e-8, **kwds):
         self.kernel = kernel
         self.n_components = n_components
-        self.kwargs = kwargs
+        self.kwds = kwds
+        self.robustness_offset = robustness_offset
 
         if kernel is None:
             self.kernel = 'linear'
@@ -187,47 +79,34 @@ class Kfda(BaseEstimator, ClassifierMixin):
         self.X_ = X
         self.y_ = y
 
-        n_datapoints = y.size
-        n_classes = self.classes_.size
+        y_onehot = OneHotEncoder().fit_transform(
+            self.y_[:, np.newaxis])
 
-        classes_datapoints = {}
+        K = pairwise_kernels(
+            X, X, metric=self.kernel, **self.kwds)
 
-        m_star = pairwise_kernels(
-            X, X, metric=self.kernel, **self.kwargs).mean(1)
+        m_classes = y_onehot.T @ K / y_onehot.T.sum(1)
+        indices = (y_onehot @ np.arange(self.classes_.size)).astype('i')
+        N = K @ (K - m_classes[indices])
 
-        m_classes = np.empty((n_classes, n_datapoints))
-        M_classes = np.empty((n_classes, n_datapoints, n_datapoints))
-        N_classes = np.empty((n_classes, n_datapoints, n_datapoints))
+        # Add value to diagonal for rank robustness
+        N += eye(self.y_.size) * self.robustness_offset
 
-        for i, label in enumerate(self.classes_):
-            class_datapoints = classes_datapoints[label] = X[y == label]
-            n_class_datapoints = class_datapoints.shape[0]
-
-            H = centering_matrix(n_class_datapoints)
-            K = pairwise_kernels(X, class_datapoints,
-                                 metric=self.kernel, **self.kwargs)
-            K.mean(1, out=m_classes[i])
-
-            m_centered = m_classes[i] - m_star
-            np.outer(m_centered, m_centered, M_classes[i])
-            K.dot(H).dot(K.T, N_classes[i])
-
-        M = M_classes.sum(0)
-        N = N_classes.sum(0)
+        m_classes_centered = m_classes - K.mean(1)
+        M = m_classes_centered.T @ m_classes_centered
 
         # Find weights
-        w, self.weights_ = eigs(M, self.n_components, N, which='LM')
+        w, self.weights_ = eigsh(M, self.n_components, N, which='LM')
 
         # Compute centers
-        self.centroids_ = m_classes.dot(self.weights_)
+        centroids_ = m_classes @ self.weights_
 
         # Train nearest centroid classifier
-        self.clf_ = ComplexNearestCentroid()
-        self.clf_.fit(self.centroids_, self.classes_)
+        self.clf_ = NearestCentroid().fit(centroids_, self.classes_)
 
         return self
 
-    def project(self, X):
+    def transform(self, X):
         """Project the points in X onto the fisher directions.
 
         Parameters
@@ -237,8 +116,8 @@ class Kfda(BaseEstimator, ClassifierMixin):
         """
         check_is_fitted(self)
         return pairwise_kernels(
-            X, self.X_, metric=self.kernel, **self.kwargs
-        ).dot(self.weights_)
+            X, self.X_, metric=self.kernel, **self.kwds
+        ) @ self.weights_
 
     def predict(self, X):
         """Perform classification on an array of test vectors X.
@@ -253,12 +132,40 @@ class Kfda(BaseEstimator, ClassifierMixin):
         -------
         C : ndarray of shape (n_samples,)
         """
-
         check_is_fitted(self)
 
         X = check_array(X)
 
-        projected_points = self.project(X)
+        projected_points = self.transform(X)
         predictions = self.clf_.predict(projected_points)
 
         return predictions
+
+    def fit_additional(self, X, y):
+        """Fit new classes without recomputing weights.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_new_samples, n_nfeatures)
+        y : array, shape = [n_samples]
+            Target values (integers)
+        """
+        check_is_fitted(self)
+        X, y = check_X_y(X, y)
+
+        new_classes = np.unique(y)
+
+        K = pairwise_kernels(
+            X, X, metric=self.kernel, **self.kwds)
+        y_onehot = OneHotEncoder().fit_transform(
+            y[:, np.newaxis])
+        new_m_classes = y_onehot.T @ K / y_onehot.T.sum(1)
+        new_centroids = new_m_classes @ self.weights_
+
+        concatenated_classes = np.concatenate([self.classes_, new_classes])
+        concatenated_centroids = np.concatenate(
+            [self.clf_.centroids_, new_centroids])
+
+        self.clf_.fit(concatenated_centroids, concatenated_classes)
+
+        return self

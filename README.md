@@ -45,7 +45,12 @@ Similar to SVM, the most glaring constraint of KFDA is the memory limit in train
 Training a Kernel FDA classifier requires creating matrices that are `n_samples` by `n_samples` large, meaning the memory requirement grows with respect to `O(n_samples^2)`.
 
 The accuracy is not as high as that of deep methods,
-With a training size of 8000 and a testing size of 62000, performance on MNIST averages around 0.7 accuracy using 8 fisher directions and a polynomial kernel of degree 2.
+With a training size of 10000 and a testing size of 60000, performance on MNIST averages around 0.97 accuracy using 9 fisher directions and the RBF kernel:
+
+```python
+cls = Kfda(kernel='rbf', n_components=9)
+```
+
 This may be due to the constrained training size.
 Accuracy can be improved without increasing training size by implementing invariant kernels that would implicitly handle scale and rotation without requiring an extended dataset.
 
