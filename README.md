@@ -15,6 +15,13 @@ demonstrate 97% accuracy by only training on one-seventh of the MNIST dataset.
 FDA and Kernel FDA classify vectors by comparing their projection in the fisher subspace to class centroids, adding a new class is just a matter of adding a new centroid.
 Thus, this model is implemented here with the hope of using Kernel FDA as a oneshot learning algorithm.
 
+## Installation
+`kfda` is available on [PyPI](https://badge.fury.io/py/kfda):
+
+```
+pip install kfda
+```
+
 ## Usage
 `Kfda` uses `scikit-learn`'s interface.
 
@@ -48,9 +55,11 @@ After running them, you can plug corresponding pairs of generated
 to visualize the embeddings.
 For example, running `mnist.py` and then loading
 `mnist_test_embeddings.tsv` and `mnist_test_labels.tsv` shows the
-following using the UMAP visualizer:
+following using the UMAP visualizer where each color is a different digit:
 
 ![MNIST Kernel FDA embeddings](https://github.com/concavegit/kfda/blob/master/img/mnist.png?raw=true)
+
+The effectiveness of the classifier is shown by the clear class separation shown.
 
 ## Notebook
 Another place to see example usage is the
@@ -68,5 +77,4 @@ With a training size of 10000 and a testing size of 60000, performance on MNIST 
 cls = Kfda(kernel='rbf', n_components=9)
 ```
 
-This may be due to the constrained training size.
 Accuracy can be improved without increasing training size by implementing invariant kernels that would implicitly handle scale and rotation without requiring an extended dataset.
