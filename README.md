@@ -23,7 +23,7 @@ following using the UMAP visualizer:
 
 ## Notebook
 Another place to see example usage is the
-[Colab Notebook](https://colab.research.google.com/drive/1nnVphyZ_0QKYZbmdJaIBjm-zYO4xwF0b#scrollTo=6Pfpr7DDQota).
+[Colab Notebook](https://colab.research.google.com/drive/1nnVphyZ_0QKYZbmdJaIBjm-zYO4xwF0b).
 
 ## Caveats
 Similar to SVM, the most glaring constraint of KFDA is the memory limit in training.
