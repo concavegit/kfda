@@ -12,7 +12,7 @@ X = (X - 127.5) / 127.5
 # train_size=8000 takes up around 12 GB of memory.
 # If you don't have that available, lower this number.
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, train_size=20000, stratify=y)
+    X, y, train_size=10000, stratify=y)
 
 cls = Kfda(kernel='rbf', n_components=9)
 print('Fitting...')
