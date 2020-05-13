@@ -1,3 +1,5 @@
+"""Module kfda"""
+import warnings
 from scipy.sparse.linalg import eigsh
 from scipy.sparse import eye
 from sklearn.base import BaseEstimator, ClassifierMixin, TransformerMixin
@@ -7,7 +9,6 @@ from sklearn.utils.multiclass import unique_labels
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.preprocessing import OneHotEncoder
 import numpy as np
-import warnings
 
 
 class Kfda(BaseEstimator, ClassifierMixin, TransformerMixin):
