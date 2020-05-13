@@ -42,7 +42,7 @@ Oneshot learning means that an algorithm can learn a new class with as little as
 This is possible for Kernel FDA because it finds a subspace that purposefully spreads out distinct classes.
 Introducing a new label involves simply adding another centroid in this subspace for use in prediction.
 See the
-[Colab Notebook](https://colab.research.google.com/drive/1nnVphyZ_0QKYZbmdJaIBjm-zYO4xwF0b).
+[Colab Notebook](https://colab.research.google.com/drive/1nnVphyZ_0QKYZbmdJaIBjm-zYO4xwF0b)
 or the
 [example](https://github.com/concavegit/kfda/blob/master/examples/mnist_oneshot.py) for examples.
 
